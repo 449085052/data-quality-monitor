@@ -1,0 +1,67 @@
+logging:
+  config: classpath:config/log4j2-dev.xml
+
+spring:
+  datasource:
+    ########## druid ##########
+    druid:
+      db-type: mysql
+      driver-class-name: com.mysql.cj.jdbc.Driver  # 驱动程序
+      url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&allowMultiQueries=true
+      username: root
+      password: root
+      initial-size: 4  # 初始化连接大小：连接池建立时创建的初始化连接数
+      min-idle: 1  # 最小空闲连接数：连接池中最小的活跃连接数
+      max-active: 5  # 最大连接数：连接池中最大的活跃连接数
+      max-wait: 60000  # 配置获取连接等待超时的时间
+      keep-alive: true
+      time-between-eviction-runs-millis: 60000  # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      min-evictable-idle-time-millis: 300000  # 配置一个连接在池中最小生存的时间，单位是毫秒
+      validation-query: select 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+      # 关闭长时间不使用的连接
+      remove-abandoned: true  # 打开removeAbandoned功能
+      remove-abandoned-timeout-millis: 1800000  # 1800秒，也就是30分钟
+      log-abandoned: true  # 关闭abanded连接时输出错误日志
+
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      pool-prepared-statements: true
+      max-open-prepared-statements: 20
+      max-pool-prepared-statement-per-connection-size: 20
+      use-global-data-source-stat: true
+
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: '*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*'
+        session-stat-enable: true # 打开session统计功能
+        profile-enable: true # 配置profileEnable能够监控单个url调用的sql列表
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*  # 访问路径为/druid时，跳转到StatViewServlet
+        login-username: root
+        login-password: root
+        reset-enable: false # 是否能够重置数据
+        allow: # 增加allow配置，不增加的话，只允许127.0.0.1这个ip地址进行访问。allow不配置具体的ip，表示所有的ip地址均可访问
+
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          db-type: mysql
+          slow-sql-millis: 3000
+          merge-sql: true
+
+        wall:
+          enabled: true
+          db-type: mysql
+          config:
+            delete-allow: true
+            drop-table-allow: false
+            truncate-allow: false
+            multi-statement-allow: true
+            none-base-statement-allow: true
+            dir: META-INF/druid/wall/mysql

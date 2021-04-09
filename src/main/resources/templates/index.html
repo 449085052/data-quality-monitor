@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>数据质量监控</title>
+    <link th:href="@{/layui/css/layui.css}" rel="stylesheet" />
+</head>
+<body>
+<p th:text="'hello SpringBoot'">hello thymeleaf</p>
+
+<!--遍历数组-->
+<table th:each="item: ${roles}">
+    <tr>
+        <td th:text="${item}"></td>
+    </tr>
+</table>
+
+</body>
+</html>

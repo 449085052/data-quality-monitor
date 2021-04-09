@@ -1,0 +1,32 @@
+mybatis:
+  config-location: classpath:config/mybatis-config.xml
+  # 注意：mapper-locations必须写成classpath*:这种方式的，因为用到了medicine-message-center模块下的mapper文件，如果写成classpath:，不会加载medicine-message-center模块下的mapper文件
+  mapper-locations: classpath*:mapper/*.xml
+
+spring:
+  profiles:
+    active: test
+  application:
+    name: data-quality-monitor
+    version: @project.version@   # 读取Maven pom.xml中的ProjectVersion
+  thymeleaf:
+    cache: false #关闭thymeleaf的缓存，不然在开发过程中修改页面不会立刻生效需要重启，生产可配置为true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5n
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+    enabled: true
+  web:
+    resources:
+      static-locations: classpath:/templates/,classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+server:
+  servlet:
+    context-path: /dqm  # 应用程序的上下文路径
+  port: 18080
+
+pagehelper:
+  reasonable: true  # 配置reasonable为 true，这时如果pageNum<=0会查询第一页，如果pageNum>总页数会查询最后一页
+  page-size-zero: true  # 使用分页后，可以配置pageSizeZero为true，配置后，当pageSize=0或者RowBounds.limit=0就会查询出全部的结果
+  helper-dialect: mysql

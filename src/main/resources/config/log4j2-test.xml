@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!--Configuration后面的status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出-->
+<!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身，设置间隔秒数-->
+<Configuration status="WARN" monitorInterval="300">
+
+    <!--日志级别：TRACE < DEBUG < INFO < WARN < ERROR < FATAL-->
+    <!--如果设置为WARN，则低于WARN的信息都不会输出-->
+    <Properties>
+        <!-- 配置日志文件输出目录,此处为/tmp目录下的logs文件夹 -->
+        <Property name="LOG_HOME">/tmp/logs</Property>
+        <property name="FILE_NAME">dqm.test</property>
+        <property name="LOG_PATTERN">[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%t] %-5level %l - %m%n</property>
+    </Properties>
+
+    <Appenders>
+        <!--这个输出控制台的配置-->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!--日志输出的格式-->
+            <!--
+                %d{yyyy-MM-dd HH:mm:ss, SSS} : 日志生产时间,输出到毫秒的时间
+                %-5level : 输出日志级别，-5表示左对齐并且固定输出5个字符，如果不足在右边补0
+                %c : logger的名称(%logger)
+                %t : 输出当前线程名称
+                %p : 日志输出格式
+                %m : 日志内容，即 logger.info("message")
+                %n : 换行符
+                %C : Java类名(%F)
+                %L : 行号
+                %M : 方法名
+                %l : 输出语句所在的行数, 包括类名、方法名、文件名、行数
+                hostName : 本地机器名
+                hostAddress : 本地ip地址
+             -->
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%t] %-5level %l - %m%n"/>
+        </Console>
+
+        <!--文件会打印出所有信息，这个log每次运行程序会自动清空，由append属性决定，这个适合临时测试用-->
+        <File name="log" fileName="${LOG_HOME}/${FILE_NAME}.log" append="false">
+
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </File>
+
+        <!--
+            循环日志文件：日志文件大于阀值的时候，就开始写一个新的日志文件
+            这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档
+
+            fileName    : 指定当前日志文件的位置和文件名称
+            filePattern : 指定当发生Rolling时，文件的转移和重命名规则
+            SizeBasedTriggeringPolicy : 指定当文件体积大于size指定的值时，触发Rolling
+            DefaultRolloverStrategy : 指定最多保存的文件个数
+            TimeBasedTriggeringPolicy : 这个配置需要和filePattern结合使用
+                注意filePattern中配置的文件重命名规则是${FILE_NAME}_%d{yyyy-MM-dd}_%i，最小的时间粒度是dd，即天，
+                TimeBasedTriggeringPolicy指定的size是1，结合起来就是每1天生成一个新文件
+        -->
+
+        <!-- 打印出所有的DEBUG及以上级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFileDebug" fileName="${LOG_HOME}/${FILE_NAME}_debug.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}_debug-%d{yyyy-MM-dd}-%i.log">
+
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+
+        <!-- 打印出所有的INFO及以上级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFileInfo" fileName="${LOG_HOME}/${FILE_NAME}_info.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}_info-%d{yyyy-MM-dd}-%i.log">
+
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+
+        <!-- 打印出所有的ERROR及以上级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFileError" fileName="${LOG_HOME}/${FILE_NAME}_error.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}_error-%d{yyyy-MM-dd}-%i.log">
+
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+
+        <!-- 打印出所有的FATAL级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFileFatal" fileName="${LOG_HOME}/${FILE_NAME}_fatal.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}_fatal-%d{yyyy-MM-dd}-%i.log">
+
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+    </Appenders>
+
+    <!--然后定义logger，只有定义了logger并引入的appender，appender才会生效-->
+    <!-- Mixed sync/async -->
+    <Loggers>
+        <!--全局日志级别-->
+        <Root level="DEBUG" includeLocation="true">
+            <!-- 这儿为trace表示什么都可以打印出来了,其他几个级别分别为：TRACE、DEBUG、INFO、WARN、ERROR和FATAL -->
+            <Appender-Ref ref="Console"/>
+            <Appender-Ref ref="log"/>
+            <Appender-Ref ref="RollingFileDebug"/>
+            <Appender-Ref ref="RollingFileInfo"/>
+            <Appender-Ref ref="RollingFileError"/>
+            <Appender-Ref ref="RollingFileFatal"/>
+        </Root>
+
+        <!-- spring日志（异步日志输出）-->
+        <AsyncLogger name="org.springframework" level="DEBUG" additivity="false">
+            <Appender-Ref ref="Console"/>
+            <Appender-Ref ref="log"/>
+            <Appender-Ref ref="RollingFileDebug"/>
+            <Appender-Ref ref="RollingFileInfo"/>
+            <Appender-Ref ref="RollingFileError"/>
+            <Appender-Ref ref="RollingFileFatal"/>
+        </AsyncLogger>
+
+        <!-- mybatis日志（异步日志输出）-->
+        <AsyncLogger name="org.apache.ibatis" level="DEBUG" additivity="false">
+            <Appender-Ref ref="Console"/>
+            <Appender-Ref ref="log"/>
+            <Appender-Ref ref="RollingFileDebug"/>
+            <Appender-Ref ref="RollingFileInfo"/>
+            <Appender-Ref ref="RollingFileError"/>
+            <Appender-Ref ref="RollingFileFatal"/>
+        </AsyncLogger>
+    </Loggers>
+
+</Configuration>
